@@ -29,29 +29,28 @@ class Gambler(MDP):
         self.estados = tuple(range(0, meta + 2))
     
     def acciones_legales(self, s):
-        if s == 0 or s == self.meta + 1:
-            return []
-        elif s == self.meta:
-            return [1]
-        return range(1, min(s, self.meta - s) + 1)
+       return range(1, min(s, self.meta - s) + 1)
     
     def recompensa(self, s, a, s_):
-        return 1 if s == self.meta else 0
+        return (
+            100  if s_ >= self.meta else
+            -100 if s_ == 0 else
+            0
+        )
     
     def prob_transicion(self, s, a, s_):
-        if s == 0 or s == self.meta + 1:
-            return 0
-        if s == self.meta:
-            return 1 if s_ == self.meta + 1 else 0
-        return self.ph if s_ == s + a else 1.0 - self.ph if s_ == s - a else 0
-    
-    def es_terminal(self, s):
-        return s == 0 or s == self.meta + 1
+        return (
+            self.ph if s_ == s + a else 
+            1.0 - self.ph if s_ == s - a else 
+            0
+        )
 
-mdp = Gambler(gama=1, ph=0.5)    
+    def es_terminal(self, s):
+        return s == 0 or s >= self.meta
+
+mdp = Gambler(gama=0.99, ph=0.45)    
 pi_star, V_star = iteracion_valor(
-    mdp, 
-    epsilon=1e-6, max_iter=10_000, ver_V=True, debug=True
+    mdp, epsilon=1e-6, max_iter=1_000, debug=True
 )
 
 plt.plot(range(1, 100), [pi_star[s] for s in range(1, 100)], '*')

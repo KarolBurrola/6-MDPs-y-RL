@@ -139,7 +139,7 @@ def iteracion_politica(mdp, epsilon=1e-6, max_iter=1000):
             break
     return pi
 
-def iteracion_valor(mdp, epsilon=1e-6, max_iter=1000, ver_V=False, debug=False):
+def iteracion_valor(mdp, epsilon=1e-6, max_iter=1_000, debug=False):
     """
     Calcula la política óptima para un MDP utilizando iteración de valor.
     
@@ -151,8 +151,6 @@ def iteracion_valor(mdp, epsilon=1e-6, max_iter=1000, ver_V=False, debug=False):
         Criterio de convergencia.
     max_iter : int
         Número máximo de iteraciones.
-    ver_V : bool
-        Si es True, devuelve la función de valor.
     debug : bool
         Si es True, imprime el valor de delta cada 100 iteraciones.
         
@@ -162,9 +160,9 @@ def iteracion_valor(mdp, epsilon=1e-6, max_iter=1000, ver_V=False, debug=False):
         Política óptima.
     
     """
-    V = {s: 0 if mdp.es_terminal(s) else random() for s in mdp.estados}
+    V = {s: 0 for s in mdp.estados}
     
-    for _ in range(max_iter):
+    for it in range(max_iter):
         delta = 0
         for s in mdp.estados:
             if not mdp.es_terminal(s):
@@ -178,8 +176,8 @@ def iteracion_valor(mdp, epsilon=1e-6, max_iter=1000, ver_V=False, debug=False):
                     for a in mdp.acciones_legales(s)
                 )
                 delta = max(delta, abs(v - V[s]))
-        if debug and _ % 100 == 0:
-            print(f"Iteración {_ + 1} - Delta: {delta}")
+        if debug and it % 50 == 0:
+            print(f"Iteración {it + 1} - Delta: {delta}")
         if delta < epsilon:
             break
     
@@ -191,9 +189,7 @@ def iteracion_valor(mdp, epsilon=1e-6, max_iter=1000, ver_V=False, debug=False):
             for s_ in mdp.estados
         )
     ) for s in mdp.estados if not mdp.es_terminal(s)}
-    if ver_V:
-        return pi, V
-    else:
-        return pi
+    
+    return pi, V
     
     

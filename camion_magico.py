@@ -24,30 +24,36 @@ class CamionMagicoProb(MDP):
         self.estados = tuple(range(1, meta + 2))
     
     def acciones_legales(self, s):
-        return ['caminar', 'usar_camion']
+        if 2*s <= self.meta:
+            return ['caminar', 'usar_camion']
+        return ['caminar']
     
     def recompensa(self, s, a, s_):
         return (
             -9  if s_ > self.meta else
              0  if s_ == self.meta else
-            -1  if a == 'caminar' else -2   
+            -1  if a == 'caminar' else 
+            -2   
         ) 
         
     def prob_transicion(self, s, a, s_):
-        if s >= self.meta:
-            return 1 if s_ == s else 0
-        elif a == 'caminar':
-            return 1 if s_ == min(s + 1, self.meta + 1) else 0
-        elif a == 'usar_camion':
-            return (self.rho if s_ == min(self.meta + 1, 2*s) else 
-                    1 - self.rho if s_ == s else 0)
+
+        if a == 'caminar':
+            return 1 if s_ == s + 1 else 0
+        return (
+            self.rho if s_ == 2*s else 
+            1 - self.rho if s_ == s else 
+            0
+        )
                 
     def es_terminal(self, s):
+        if s >= self.meta:
+            return True
         return False
     
-for rho in [0.01, 0.2, 0.4, 0.5, 0.6, 0.8, 0.99]:
+for rho in [0.01, 0.2, 0.5, 0.8, 0.99]:
     print(f"Para rho = {rho}")
-    pi_star = iteracion_valor(CamionMagicoProb(0.9, rho, 145))
+    pi_star, V = iteracion_valor(CamionMagicoProb(0.9, rho, 145))
     print(f"Los tramos donde se debe usar el camión son:")
     print([s for s in pi_star if pi_star[s] == 'usar_camion'])
     print("-"*50)
